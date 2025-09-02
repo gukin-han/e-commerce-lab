@@ -7,7 +7,6 @@ import lombok.Builder;
 public record InitiateCommand(
         Long orderId,
         PaymentMethod method,
-        String callbackUrl,
         String cardType,
         String cardNo
 ) {

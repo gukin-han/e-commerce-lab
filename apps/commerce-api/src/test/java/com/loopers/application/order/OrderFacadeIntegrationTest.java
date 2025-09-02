@@ -1,17 +1,11 @@
 package com.loopers.application.order;
 
-import com.loopers.application.order.dto.Cart;
-import com.loopers.application.order.dto.CartItem;
-import com.loopers.application.order.dto.PlaceOrderCommand;
-import com.loopers.application.order.dto.PlaceOrderResult;
-import com.loopers.domain.brand.BrandId;
 import com.loopers.domain.coupon.Coupon;
 import com.loopers.domain.coupon.CouponRepository;
 import com.loopers.domain.coupon.CouponType;
 import com.loopers.domain.coupon.Percent;
 import com.loopers.domain.order.*;
 import com.loopers.domain.order.Order;
-import com.loopers.domain.payment.PaymentMethod;
 import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointRepository;
 import com.loopers.domain.product.Money;
@@ -25,9 +19,7 @@ import com.loopers.utils.DatabaseCleanUp;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -88,11 +80,11 @@ class OrderFacadeIntegrationTest {
             point = Point.create(user, Money.of(1_000_000));
             point = pointRepository.save(point);
 
-            coupon = Coupon.create(CouponType.PERCENTAGE, user.getUserId(), null, Percent.of(0.2));
+            coupon = Coupon.create(CouponType.PERCENTAGE, user.getId(), null, Percent.of(0.2));
             coupon = couponRepository.save(coupon);
 
-            product1 = Product.create(Stock.of(10), "맥북", Money.of(10_000), BrandId.of(1L));
-            product2 = Product.create(Stock.of(10), "아이폰", Money.of(5_000), BrandId.of(1L));
+            product1 = Product.create(Stock.of(10), "맥북", Money.of(10_000), 1L);
+            product2 = Product.create(Stock.of(10), "아이폰", Money.of(5_000), 1L);
             savedProducts = productRepository.saveAll(List.of(product1, product2));
         }
 
@@ -100,21 +92,24 @@ class OrderFacadeIntegrationTest {
         @Test
         void shouldPlaceOrderSuccessfully() {
             //given
-            List<CartItem> items = new ArrayList<>();
+            List<OrderCommand.CartItem> items = new ArrayList<>();
             for (Product p : savedProducts) {
-                CartItem item = CartItem.of(p.getProductId().getValue(), 2L);
-                items.add(CartItem.of(p.getProductId().getValue(), 2L));
+                OrderCommand.CartItem item = new OrderCommand.CartItem(p.getId(), 2L);
+                items.add(item);
             }
-            Cart cart = Cart.from(items);
-            PlaceOrderCommand command = PlaceOrderCommand.of(cart, user.getUserId().getValue(), coupon.getCouponId().getValue(), PaymentMethod.POINT);
+            OrderCommand.Create command = OrderCommand.Create.of(
+                    user.getId(),
+                    items,
+                    coupon.getId()
+            );
 
             //when
-            PlaceOrderResult result = orderFacade.placeOrder(command);
+            OrderResult.Create result = orderFacade.create(command);
 
             //then
-            Optional<Order> order = orderRepository.findByOrderId(OrderId.of(result.getOrderId()));
-            Optional<Point> pointAfterOrder = pointRepository.findByUserId(user.getUserId());
-            List<OrderItem> orderItems = orderItemRepository.findOrderItemsByOrderId(OrderId.of(result.getOrderId()));
+            Optional<Order> order = orderRepository.findByOrderId(result.orderId());
+            Optional<Point> pointAfterOrder = pointRepository.findByUserId(user.getId());
+            List<OrderItem> orderItems = orderItemRepository.findOrderItemsByOrderId(result.orderId());
             Assertions.assertAll(
                     () -> assertThat(order.isPresent()).isTrue(),
                     () -> assertThat(orderItems.size()).isEqualTo(2)
@@ -125,20 +120,23 @@ class OrderFacadeIntegrationTest {
         @Test
         void shouldPlaceOrderSuccessfully_whenNoCouponIsProvided() {
             //given
-            List<CartItem> items = savedProducts.stream()
-                    .map(p -> CartItem.of(p.getProductId().getValue(), 2L))
+            List<OrderCommand.CartItem> items = savedProducts.stream()
+                    .map(p -> new OrderCommand.CartItem(p.getId(), 2L))
                     .toList();
-            Cart cart = Cart.from(items);
             // command에 couponId로 null을 전달
-            PlaceOrderCommand command = PlaceOrderCommand.of(cart, user.getUserId().getValue(), null, PaymentMethod.POINT);
+            OrderCommand.Create command = OrderCommand.Create.of(
+                    user.getId(),
+                    items,
+                    null
+            );
 
             //when
-            PlaceOrderResult result = orderFacade.placeOrder(command);
+            OrderResult.Create result = orderFacade.create(command);
 
             //then
-            Optional<Order> order = orderRepository.findByOrderId(OrderId.of(result.getOrderId()));
-            Optional<Point> pointAfterOrder = pointRepository.findByUserId(user.getUserId());
-            List<OrderItem> orderItems = orderItemRepository.findOrderItemsByOrderId(OrderId.of(result.getOrderId()));
+            Optional<Order> order = orderRepository.findByOrderId(result.orderId());
+            Optional<Point> pointAfterOrder = pointRepository.findByUserId(user.getId());
+            List<OrderItem> orderItems = orderItemRepository.findOrderItemsByOrderId(result.orderId());
 
             Assertions.assertAll(
                 () -> assertThat(order.isPresent()).isTrue(),
@@ -154,23 +152,26 @@ class OrderFacadeIntegrationTest {
             ExecutorService pool = Executors.newFixedThreadPool(threadCount);
 
             // 주문할 상품 준비
-            List<CartItem> items = savedProducts.stream()
-                    .map(p -> CartItem.of(p.getProductId().getValue(), 1L))
+            List<OrderCommand.CartItem> items = savedProducts.stream()
+                    .map(p -> new OrderCommand.CartItem(p.getId(), 1L))
                     .toList();
-            Cart cart = Cart.from(items);
-            PlaceOrderCommand command = PlaceOrderCommand.of(cart, user.getUserId().getValue(), coupon.getCouponId().getValue(), PaymentMethod.POINT);
+            OrderCommand.Create command = OrderCommand.Create.of(
+                    user.getId(),
+                    items,
+                    coupon.getId()
+            );
 
             // 동시 시작/종료 장치
             CyclicBarrier start = new CyclicBarrier(threadCount);
             CountDownLatch done = new CountDownLatch(threadCount);
             // 결과 수집 (스레드 안전)
             List<Throwable> errors = Collections.synchronizedList(new ArrayList<>());
-            List<PlaceOrderResult> successes = Collections.synchronizedList(new ArrayList<>());
+            List<OrderResult.Create> successes = Collections.synchronizedList(new ArrayList<>());
             for (int i = 0; i < threadCount; i++) {
                 pool.submit(() -> {
                     try {
                         start.await(); // 모두 모여서 동시에 시작
-                        PlaceOrderResult r = orderFacade.placeOrder(command);
+                        OrderResult.Create r = orderFacade.create(command);
                         successes.add(r);
                     } catch (Throwable t) {
                         errors.add(t);

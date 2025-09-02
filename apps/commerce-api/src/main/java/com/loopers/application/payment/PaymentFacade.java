@@ -7,19 +7,18 @@ import com.loopers.application.payment.strategy.PaymentStrategyRouter;
 import com.loopers.common.error.CoreException;
 import com.loopers.common.error.ErrorType;
 import com.loopers.domain.order.Order;
-import com.loopers.domain.order.OrderRepository;
 import com.loopers.domain.order.OrderService;
 import com.loopers.domain.payment.*;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -30,18 +29,26 @@ public class PaymentFacade {
     // TODO : 어디에 둘지 고민해보기
     public static final String BASE_CALLBACK_URL = "http://localhost:8080/api/v1/payments/%s/callback";
     private final PaymentRepository paymentRepository;
+    private final PaymentService paymentService;
     private final PaymentStrategyRouter router;
     private final UserService userService;
     private final OrderService orderService;
     private final PaymentClient paymentClient;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     //    @Transactional
     public PayResult initiatePayment(String loginId, InitiateCommand command) {
+        paymentService.checkDuplicatePayment(command.orderId());
+        PayCommand payCommand = this.createPayCommand(loginId, command);
+        PaymentStrategy paymentStrategy = router.requestPayment(payCommand.getMethod());
+        return paymentStrategy.requestPayment(payCommand);
+    }
+
+    private PayCommand createPayCommand(String loginId, InitiateCommand command) {
         User user = userService.getByLoginId(loginId);
         Order order = orderService.get(command.orderId());
-
-        PayCommand payCommand = PayCommand.builder()
+        return PayCommand.builder()
                 .orderId(order.getId())
                 .userId(user.getId())
                 .loginId(user.getLoginId())
@@ -51,11 +58,9 @@ public class PaymentFacade {
                 .cardType(command.cardType())
                 .cardNo(command.cardNo())
                 .build();
-
-        PaymentStrategy paymentStrategy = router.requestPayment(command.method());
-        return paymentStrategy.requestPayment(payCommand);
     }
 
+    @Transactional
     public void syncPaymentCallbacks(Duration window) {
         ZonedDateTime cutoff = ZonedDateTime.now().minus(window);
 
@@ -80,6 +85,7 @@ public class PaymentFacade {
         });
     }
 
+    @Transactional
     public void syncPaymentCallback(SyncPaymentCommand command) {
         // 결제 상태 동기화 로직
         // 1. 주문 ID로 결제 정보 조회
@@ -90,5 +96,12 @@ public class PaymentFacade {
         payment.syncStatus(command.getStatus(), command.getReason());
 
         // 3. 성공/실패에 따라 주문 상태 업데이트 (생략)
+        if ("SUCCESS".equals(command.getStatus())) {
+            eventPublisher.publishEvent(new PaymentEvent.Completed(payment.getOrderId(), payment.getUserId()));
+        }
+
+        if ("FAILED".equals(command.getStatus())) {
+            eventPublisher.publishEvent(new PaymentEvent.Failed(payment.getOrderId(), payment.getUserId()));
+        }
     }
 }

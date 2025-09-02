@@ -1,49 +1,54 @@
 package com.loopers.application.like;
 
-import com.loopers.application.like.dto.LikeCommand;
-import com.loopers.application.like.dto.LikeProductResult;
-import com.loopers.application.like.dto.UnlikeCommand;
-import com.loopers.application.like.dto.UnlikeProductResult;
+import com.loopers.domain.like.ProductLikeEvent;
 import com.loopers.domain.like.ProductLikeRepository;
-import com.loopers.domain.product.ProductId;
-import com.loopers.domain.product.ProductRepository;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class ProductLikeFacade {
 
     private final UserService userService;
-    private final ProductRepository productRepository;
     private final ProductLikeRepository productLikeRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public LikeProductResult like(LikeCommand command) {
-        User user = userService.getByLoginId(command.getLoginId());
+    public ProductLikeResult.Like like(ProductLikeCommand.Like command) {
+        User user = userService.getByLoginId(command.loginId());
 
-        boolean isInserted = productLikeRepository.insertIgnoreDuplicateKey(user.getUserId(), ProductId.of(command.getProductId()));
+        // 1. 상품 좋아요 등록
+        boolean isInserted = productLikeRepository.insertIgnoreDuplicateKey(user.getId(), command.productId());
+
+        // 2. 상품 좋아요 수 증가
         if (isInserted) {
-            boolean isIncreased = productRepository.incrementLikeCount(command.getProductId());
-            return LikeProductResult.success();
+            eventPublisher.publishEvent(new ProductLikeEvent.Added(command.productId(), UUID.randomUUID(), Instant.now()));
+            return ProductLikeResult.Like.success();
         }
 
-        return LikeProductResult.alreadyLiked();
+        return ProductLikeResult.Like.alreadyLiked();
     }
 
     @Transactional
-    public UnlikeProductResult unlike(UnlikeCommand command) {
-        User user = userService.getByLoginId(command.getLoginId());
+    public ProductLikeResult.Unlike unlike(ProductLikeCommand.Unlike command) {
+        User user = userService.getByLoginId(command.loginId());
 
-        boolean isDeleted = productLikeRepository.deleteByProductIdAndUserId(user.getUserId(), ProductId.of(command.getProductId()));
+        // 1. 상품 좋아요 삭제
+        boolean isDeleted = productLikeRepository.deleteByProductIdAndUserId(user.getId(), command.productId());
         if (isDeleted) {
-            boolean isDecreased = productRepository.decrementLikeCount(command.getProductId());
-            return UnlikeProductResult.success();
+
+        // 2. 상품 좋아요 수 감소
+            eventPublisher.publishEvent(new ProductLikeEvent.Deleted(command.productId(), UUID.randomUUID(), Instant.now()));
+            return ProductLikeResult.Unlike.success();
         }
 
-        return UnlikeProductResult.alreadyUnliked();
+        return ProductLikeResult.Unlike.alreadyUnliked();
     }
 }

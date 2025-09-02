@@ -3,7 +3,6 @@ package com.loopers.domain.point;
 import com.loopers.domain.BaseEntity;
 import com.loopers.domain.product.Money;
 import com.loopers.domain.user.User;
-import com.loopers.domain.user.UserId;
 import com.loopers.common.error.CoreException;
 import com.loopers.common.error.ErrorType;
 import jakarta.persistence.AttributeOverride;
@@ -27,11 +26,10 @@ public class Point extends BaseEntity {
 
     private String loginId;
 
-    @Embedded
-    private UserId userId;
+    private Long userId;
 
     @Builder
-    private Point(Money balance, String loginId, UserId userId) {
+    private Point(Money balance, String loginId, Long userId) {
         if (loginId == null || loginId.isEmpty()) {
             throw new CoreException(ErrorType.BAD_REQUEST, "유저 아이디는 필수 입력 항목입니다.");
         }
@@ -48,7 +46,7 @@ public class Point extends BaseEntity {
     public static Point create(User user, Money balance) {
         return Point.builder()
                 .balance(balance)
-                .userId(user.getUserId())
+                .userId(user.getId())
                 .loginId(user.getLoginId())
                 .build();
     }

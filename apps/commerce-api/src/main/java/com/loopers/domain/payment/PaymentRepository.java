@@ -14,4 +14,6 @@ public interface PaymentRepository {
     Optional<Payment> findByOrderId(Long orderId);
 
     Page<Payment> findPendingSince(ZonedDateTime cutoff, Pageable pageable);
+
+    boolean existsByOrderId(Long orderId);
 }

@@ -23,7 +23,7 @@ public class CardPaymentAdapter implements PaymentStrategy {
         try {
             // 결제 요청
             PayResult result = paymentClient.requestPayment(command);
-            Payment payment = Payment.createPending(command.getUserId(), command.getOrderId(), command.getAmount(), PaymentMethod.CARD);
+            Payment payment = Payment.createRequested(command.getUserId(), command.getOrderId(), command.getAmount(), PaymentMethod.CARD);
             paymentRepository.save(payment);
             return result;
         } catch (Throwable e) {

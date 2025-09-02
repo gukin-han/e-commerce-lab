@@ -5,7 +5,6 @@ import com.loopers.domain.point.PointRepository;
 
 import java.util.Optional;
 
-import com.loopers.domain.user.UserId;
 import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.Lock;
@@ -30,12 +29,12 @@ public class PointRepositoryImpl implements PointRepository {
 
     @Override
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    public Optional<Point> findByUserIdForUpdate(UserId userId) {
+    public Optional<Point> findByUserIdForUpdate(Long userId) {
         return pointJpaRepository.findByUserIdForUpdate(userId);
     }
 
     @Override
-    public Optional<Point> findByUserId(UserId userId) {
+    public Optional<Point> findByUserId(Long userId) {
         return pointJpaRepository.findByUserId(userId);
     }
 }

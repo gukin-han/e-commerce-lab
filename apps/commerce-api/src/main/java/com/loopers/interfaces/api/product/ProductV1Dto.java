@@ -4,9 +4,6 @@ import com.loopers.application.common.dto.PagedResult;
 import com.loopers.application.product.dto.ProductDetailView;
 import com.loopers.application.product.dto.ProductSortType;
 import com.loopers.application.product.dto.ProductSummaryView;
-import com.loopers.domain.brand.BrandId;
-import com.loopers.domain.product.Money;
-import com.loopers.domain.product.ProductId;
 import com.loopers.domain.product.ProductStatus;
 import com.loopers.domain.product.Stock;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -65,13 +62,13 @@ public class ProductV1Dto {
 
             public static ProductSummaryResponse of(ProductSummaryView productSummaryView) {
                 return ProductSummaryResponse.builder()
-                        .productId(productSummaryView.getProductId().getValue())
+                        .productId(productSummaryView.getProductId())
                         .stock(productSummaryView.getStock())
                         .likeCount(productSummaryView.getLikeCount())
                         .status(productSummaryView.getStatus())
                         .productName(productSummaryView.getProductName())
                         .price(productSummaryView.getPrice().getValue().doubleValue())
-                        .brandId(productSummaryView.getBrandId().getValue())
+                        .brandId(productSummaryView.getBrandId())
                         .brandName(productSummaryView.getBrandName())
                         .build();
             }
@@ -119,13 +116,13 @@ public class ProductV1Dto {
 
         public static GetProductByIdResponse of(ProductDetailView view) {
             return GetProductByIdResponse.builder()
-                    .productId(view.getProductId().getValue())
+                    .productId(view.getProductId())
                     .stock(view.getStock().getQuantity())
                     .likeCount(view.getLikeCount())
                     .status(view.getStatus())
                     .productName(view.getProductName())
                     .price(view.getPrice().getValue().doubleValue())
-                    .brandId(view.getBrandId().getValue())
+                    .brandId(view.getBrandId())
                     .brandName(view.getBrandName())
                     .build();
         }

@@ -1,7 +1,6 @@
 package com.loopers.infrastructure.data.product;
 
 import com.loopers.application.product.dto.ProductSortType;
-import com.loopers.domain.brand.BrandId;
 import com.loopers.domain.product.ProductDetail;
 import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductRepository;
@@ -33,7 +32,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public List<ProductDetail> findPagedProductDetails(BrandId brandId, int page, int size, ProductSortType productSortType) {
+    public List<ProductDetail> findPagedProductDetails(Long brandId, int page, int size, ProductSortType productSortType) {
         return jpaQueryFactory
                 .select(Projections.constructor(ProductDetail.class,
                         product.id,
@@ -45,7 +44,7 @@ public class ProductRepositoryImpl implements ProductRepository {
                         brand.name
                 ))
                 .from(product)
-                .innerJoin(brand).on(product.brandId.value.eq(brand.id))
+                .innerJoin(brand).on(product.brandId.eq(brand.id))
                 .where(brandEq(brandId))
                 .orderBy(productSort(productSortType))
                 .offset((long) page * size)
@@ -53,12 +52,12 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .fetch();
     }
 
-    private BooleanExpression brandEq(BrandId brandId) {
-        return brandId == null ? null : product.brandId.eq(brandId);
+    private BooleanExpression brandEq(Long brandId) {
+        return brandId == null ? null : brand.id.eq(brandId);
     }
 
     @Override
-    public long getTotalCountByBrandId(BrandId brandId) {
+    public long getTotalCountByBrandId(Long brandId) {
         if (brandId == null) {
             return productJpaRepository.count();
         } else {
@@ -96,6 +95,24 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public List<Product> findAllById(List<Long> productIds) {
         return productJpaRepository.findAllById(productIds);
+    }
+
+    @Override
+    public void updateLikeCount(Long productId, long count) {
+        jpaQueryFactory
+                .update(product)
+                .set(product.likeCount, product.likeCount.add(count)) // ← delta 더하기
+                .where(product.id.eq(productId))
+                .execute();
+    }
+
+    @Override
+    public Long getLikeCount(Long productId) {
+        return jpaQueryFactory
+                .select(product.likeCount)
+                .from(product)
+                .where(product.id.eq(productId))
+                .fetchOne();
     }
 
     private OrderSpecifier<?>[] productSort(ProductSortType s) {

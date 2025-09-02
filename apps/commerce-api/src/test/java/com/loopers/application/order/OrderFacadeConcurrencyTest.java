@@ -1,15 +1,9 @@
 package com.loopers.application.order;
 
-import com.loopers.application.order.dto.Cart;
-import com.loopers.application.order.dto.CartItem;
-import com.loopers.application.order.dto.PlaceOrderCommand;
-import com.loopers.application.order.dto.PlaceOrderResult;
-import com.loopers.domain.brand.BrandId;
 import com.loopers.domain.coupon.Coupon;
 import com.loopers.domain.coupon.CouponRepository;
 import com.loopers.domain.coupon.CouponType;
 import com.loopers.domain.coupon.Percent;
-import com.loopers.domain.payment.PaymentMethod;
 import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointRepository;
 import com.loopers.domain.product.Money;
@@ -25,9 +19,7 @@ import com.loopers.utils.DatabaseCleanUp;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,11 +75,11 @@ public class OrderFacadeConcurrencyTest {
             point1 = pointRepository.save(point1);
             point2 = pointRepository.save(point2);
 
-            coupon = Coupon.create(CouponType.PERCENTAGE, user1.getUserId(), null, Percent.of(0.2));
+            coupon = Coupon.create(CouponType.PERCENTAGE, user1.getId(), null, Percent.of(0.2));
             coupon = couponRepository.save(coupon);
 
-            product1 = Product.create(Stock.of(1000), "맥북", Money.of(10_000), BrandId.of(1L));
-            product2 = Product.create(Stock.of(1000), "아이폰", Money.of(5_000), BrandId.of(1L));
+            product1 = Product.create(Stock.of(1000), "맥북", Money.of(10_000), 1L);
+            product2 = Product.create(Stock.of(1000), "아이폰", Money.of(5_000), 1L);
             savedProducts = productRepository.saveAll(List.of(product1, product2));
         }
 
@@ -96,16 +88,20 @@ public class OrderFacadeConcurrencyTest {
         @Test
         void useCouponExactlyOnce() throws Exception {
             // given
-            List<CartItem> items = savedProducts.stream()
-                    .map(p -> CartItem.of(p.getProductId().getValue(), 1L))
+            List<OrderCommand.CartItem> items = savedProducts.stream()
+                    .map(p -> new OrderCommand.CartItem(p.getId(), 1L))
                     .toList();
-            Cart cart = Cart.from(items);
-            PlaceOrderCommand command = PlaceOrderCommand.of(cart, user1.getUserId().getValue(), coupon.getCouponId().getValue(), PaymentMethod.POINT);
+
+            OrderCommand.Create command = OrderCommand.Create.of(
+                    user1.getId(),
+                    items,
+                    coupon.getId()
+            );
 
             // when
-            ConcurrentTestResult<PlaceOrderResult> result = ConcurrentTestRunner.run(
+            ConcurrentTestResult<OrderResult.Create> result = ConcurrentTestRunner.run(
                     10,
-                    () -> orderFacade.placeOrder(command)
+                    () -> orderFacade.create(command)
             );
 
             // then
@@ -117,21 +113,25 @@ public class OrderFacadeConcurrencyTest {
         @Test
         void deductStocksProperly() throws Exception {
             // given
-            List<CartItem> items = savedProducts.stream()
-                    .map(p -> CartItem.of(p.getProductId().getValue(), 1L))
+            List<OrderCommand.CartItem> items = savedProducts.stream()
+                    .map(p -> new OrderCommand.CartItem(p.getId(), 1L))
                     .toList();
-            Cart cart = Cart.from(items);
-            PlaceOrderCommand command = PlaceOrderCommand.of(cart, user1.getUserId().getValue(), null, PaymentMethod.POINT);
+
+            OrderCommand.Create command = OrderCommand.Create.of(
+                    user1.getId(),
+                    items,
+                    null
+            );
 
             // when
-            ConcurrentTestResult<PlaceOrderResult> result = ConcurrentTestRunner.run(
+            ConcurrentTestResult<OrderResult.Create> result = ConcurrentTestRunner.run(
                     10,
-                    () -> orderFacade.placeOrder(command)
+                    () -> orderFacade.create(command)
             );
 
             // then
-            Product product1 = productRepository.findById(savedProducts.get(0).getProductId().getValue()).get();
-            Product product2 = productRepository.findById(savedProducts.get(1).getProductId().getValue()).get();
+            Product product1 = productRepository.findById(savedProducts.get(0).getId()).get();
+            Product product2 = productRepository.findById(savedProducts.get(1).getId()).get();
             Assertions.assertAll(
                     () -> assertThat(result.getSuccesses()).hasSize(10),
                     () -> assertThat(result.getErrors()).hasSize(0),

@@ -1,8 +1,6 @@
 package com.loopers.infrastructure.data.like;
 
 import com.loopers.domain.like.ProductLike;
-import com.loopers.domain.product.ProductId;
-import com.loopers.domain.user.UserId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface ProductLikeJpaRepository extends JpaRepository<ProductLike, Long> {
-    Optional<ProductLike> findByUserIdAndProductId(UserId userId, ProductId productId);
+    Optional<ProductLike> findByUserIdAndProductId(Long userId, Long productId);
 
     @Modifying
     @Query(value = """
@@ -19,6 +17,6 @@ public interface ProductLikeJpaRepository extends JpaRepository<ProductLike, Lon
         """, nativeQuery = true)
     int insertIgnoreDuplicateKey(Long userId, Long productId);
 
-    int deleteByProductIdAndUserId(ProductId productId, UserId userId);
+    int deleteByProductIdAndUserId(Long productId, Long userId);
 
 }

@@ -42,6 +42,13 @@ public class Stock {
         return new Stock(remaining);
     }
 
+    public Stock increase(long quantity) {
+        if (quantity <= 0) {
+            throw new CoreException(ErrorType.BAD_REQUEST, "0 보다 작거나 같은 값으로 재고를 증가시킬 수 없습니다.");
+        }
+        return new Stock(this.quantity + quantity);
+    }
+
     public boolean isSoldOut() {
         return quantity == 0;
     }

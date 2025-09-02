@@ -58,8 +58,4 @@ public class User extends BaseEntity {
                 .gender(Gender.MALE)
                 .build();
     }
-
-    public UserId getUserId() {
-        return getId() == null ? null : UserId.of(getId());
-    }
 }

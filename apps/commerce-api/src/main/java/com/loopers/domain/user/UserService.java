@@ -30,8 +30,8 @@ public class UserService {
     }
 
     @Transactional
-    public User findByUserId(UserId userId) {
-        return userRepository.findByUserId(userId.getValue()).orElseThrow(EntityNotFoundException::new);
+    public User findByUserId(Long userId) {
+        return userRepository.findByUserId(userId).orElseThrow(EntityNotFoundException::new);
     }
 
     @Transactional

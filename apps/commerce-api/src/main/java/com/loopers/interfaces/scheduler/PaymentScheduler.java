@@ -17,7 +17,7 @@ public class PaymentScheduler {
 
     public static final String EVERY_FIVE_MINUTES = "0 */5 * * * *";
 
-    @Scheduled(cron = EVERY_FIVE_MINUTES)
+//    @Scheduled(cron = EVERY_FIVE_MINUTES)
     public void syncPayments() {
         log.info("Syncing payments");
         try {

@@ -3,7 +3,6 @@ package com.loopers.application.product;
 import com.loopers.application.common.dto.PagedResult;
 import com.loopers.application.product.dto.*;
 import com.loopers.domain.brand.Brand;
-import com.loopers.domain.brand.BrandId;
 import com.loopers.domain.brand.BrandRepository;
 import com.loopers.domain.product.*;
 import com.loopers.utils.DatabaseCleanUp;
@@ -56,7 +55,7 @@ class ProductFacadeTest {
                     .price(Money.of(1000L))
                     .stock(Stock.of(10L))
                     .status(ProductStatus.ACTIVE)
-                    .brandId(BrandId.of(savedBrand.getId()))
+                    .brandId(savedBrand.getId())
                     .build();
             Product savedProduct = productRepository.save(product);
 
@@ -68,7 +67,7 @@ class ProductFacadeTest {
             // Then
             Assertions.assertAll(
                     () -> assertNotNull(detailView),
-                    () -> assertEquals(savedProduct.getProductId(), detailView.getProductId()),
+                    () -> assertEquals(savedProduct.getId(), detailView.getProductId()),
                     () -> assertEquals(savedProduct.getName(), detailView.getProductName()),
                     () -> assertEquals(savedBrand.getName(), detailView.getBrandName())
             );
@@ -94,7 +93,7 @@ class ProductFacadeTest {
                         .price(Money.of(100L * i))
                         .stock(Stock.of(10L))
                         .status(ProductStatus.ACTIVE)
-                        .brandId(currentBrand.getBrandId())
+                        .brandId(currentBrand.getId())
                         .likeCount(i)
                         .build();
                 productRepository.save(product);
@@ -146,9 +145,9 @@ class ProductFacadeTest {
             Brand brand = brandRepository.save(Brand.create("Generic Brand"));
 
             // 좋아요 수가 다른 상품들 생성
-            productRepository.save(Product.builder().name("P1").price(Money.of(100L)).stock(Stock.of(1L)).status(ProductStatus.ACTIVE).brandId(brand.getBrandId()).likeCount(5).build());
-            productRepository.save(Product.builder().name("P2").price(Money.of(200L)).stock(Stock.of(1L)).status(ProductStatus.ACTIVE).brandId(brand.getBrandId()).likeCount(15).build());
-            productRepository.save(Product.builder().name("P3").price(Money.of(300L)).stock(Stock.of(1L)).status(ProductStatus.ACTIVE).brandId(brand.getBrandId()).likeCount(10).build());
+            productRepository.save(Product.builder().name("P1").price(Money.of(100L)).stock(Stock.of(1L)).status(ProductStatus.ACTIVE).brandId(brand.getId()).likeCount(5).build());
+            productRepository.save(Product.builder().name("P2").price(Money.of(200L)).stock(Stock.of(1L)).status(ProductStatus.ACTIVE).brandId(brand.getId()).likeCount(15).build());
+            productRepository.save(Product.builder().name("P3").price(Money.of(300L)).stock(Stock.of(1L)).status(ProductStatus.ACTIVE).brandId(brand.getId()).likeCount(10).build());
 
             ProductPageQuery query = ProductPageQuery.create(0, 3, ProductSortType.LIKES_DESC);
 
@@ -176,9 +175,9 @@ class ProductFacadeTest {
             Brand brand = brandRepository.save(Brand.create("Generic Brand"));
 
             // 가격이 다른 상품들 생성
-            productRepository.save(Product.builder().name("P1").price(Money.of(300L)).stock(Stock.of(1L)).status(ProductStatus.ACTIVE).brandId(brand.getBrandId()).likeCount(1).build());
-            productRepository.save(Product.builder().name("P2").price(Money.of(100L)).stock(Stock.of(1L)).status(ProductStatus.ACTIVE).brandId(brand.getBrandId()).likeCount(1).build());
-            productRepository.save(Product.builder().name("P3").price(Money.of(200L)).stock(Stock.of(1L)).status(ProductStatus.ACTIVE).brandId(brand.getBrandId()).likeCount(1).build());
+            productRepository.save(Product.builder().name("P1").price(Money.of(300L)).stock(Stock.of(1L)).status(ProductStatus.ACTIVE).brandId(brand.getId()).likeCount(1).build());
+            productRepository.save(Product.builder().name("P2").price(Money.of(100L)).stock(Stock.of(1L)).status(ProductStatus.ACTIVE).brandId(brand.getId()).likeCount(1).build());
+            productRepository.save(Product.builder().name("P3").price(Money.of(200L)).stock(Stock.of(1L)).status(ProductStatus.ACTIVE).brandId(brand.getId()).likeCount(1).build());
 
             ProductPageQuery query = ProductPageQuery.create(0, 3, ProductSortType.PRICE_ASC);
 

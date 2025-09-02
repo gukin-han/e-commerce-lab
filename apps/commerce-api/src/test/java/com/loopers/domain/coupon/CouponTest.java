@@ -1,7 +1,6 @@
 package com.loopers.domain.coupon;
 
 import com.loopers.domain.product.Money;
-import com.loopers.domain.user.UserId;
 
 import java.math.BigDecimal;
 
@@ -23,7 +22,7 @@ class CouponTest {
         void createFixedAmountCoupon() {
             // given
             CouponType type = CouponType.FIXED_AMOUNT;
-            UserId userId = UserId.of(1L);
+            Long userId = 1L;
             Money amount = Money.of(new BigDecimal(1000));
 
             // when
@@ -45,7 +44,7 @@ class CouponTest {
         void createPercentageCoupon_withZeroOrNegativePercent() {
             // given
             CouponType type = CouponType.PERCENTAGE;
-            UserId userId = UserId.of(1L);
+            Long userId = 1L;
             Percent percent = Percent.of(0.1d);
 
             // when
@@ -63,7 +62,7 @@ class CouponTest {
         @DisplayName("쿠폰 타입이 null이면 예외가 발생한다.")
         void throwsException_whenTypeIsNull() {
             // given
-            UserId userId = UserId.of(1L);
+            Long userId = 1L;
             CouponType type = null;
 
             // when
@@ -80,7 +79,7 @@ class CouponTest {
             // given
             CouponType type = CouponType.FIXED_AMOUNT;
             Money amount = Money.of(new BigDecimal(1000));
-            UserId userId = null;
+            Long userId = null;
 
 
             // when
@@ -96,7 +95,7 @@ class CouponTest {
         void throwsException_whenFixedAmountCouponAmountIsNull() {
             // given
             CouponType type = CouponType.FIXED_AMOUNT;
-            UserId userId = UserId.of(1L);
+            Long userId = 1L;
 
             // when
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -111,7 +110,7 @@ class CouponTest {
         void throwsException_whenPercentageCouponPercentIsNull() {
             // given
             CouponType type = CouponType.PERCENTAGE;
-            UserId userId = UserId.of(1L);
+            Long userId = 1L;
 
             // when
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -126,7 +125,7 @@ class CouponTest {
         void throwsException_whenPercentageCouponPercentIsLessThanAndEqualsZero() {
             // given
             CouponType type = CouponType.PERCENTAGE;
-            UserId userId = UserId.of(1L);
+            Long userId = 1L;
             Double percent = 1.1;
 
             // when
@@ -142,7 +141,7 @@ class CouponTest {
         void throwsException_whenFixedAmountCouponAmountIsLessThanAndEqualsZero() {
             // given
             CouponType type = CouponType.FIXED_AMOUNT;
-            UserId userId = UserId.of(1L);
+            Long userId = 1L;
             long amount = -10;
 
             // when

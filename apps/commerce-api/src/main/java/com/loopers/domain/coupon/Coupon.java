@@ -1,16 +1,12 @@
 package com.loopers.domain.coupon;
 
 import com.loopers.domain.BaseEntity;
-import com.loopers.domain.order.Order;
-import com.loopers.domain.order.OrderId;
 import com.loopers.domain.product.Money;
-import com.loopers.domain.user.UserId;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,17 +17,15 @@ public class Coupon extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private CouponType type;
 
-    @Embedded
-    private UserId userId;
+    private Long userId;
+
+    private Long orderId;
 
     @Embedded
     private Money amount;
 
     @Embedded
     private Percent discountRate;
-
-    @Embedded
-    private OrderId orderId;
 
     @Enumerated(value = EnumType.STRING)
     private CouponStatus status;
@@ -40,7 +34,7 @@ public class Coupon extends BaseEntity {
     private Long version;
 
     @Builder
-    private Coupon(CouponType type, UserId userId, Money amount, Percent discountRate, CouponStatus status) {
+    private Coupon(CouponType type, Long userId, Money amount, Percent discountRate, CouponStatus status) {
         if (type == null || userId == null) {
             throw new IllegalArgumentException("쿠폰 타입과 유저아이디는 필수 입력값입니다.");
         }
@@ -74,17 +68,13 @@ public class Coupon extends BaseEntity {
         }
     }
 
-    public static Coupon create(CouponType type, UserId userId, Money amount, Percent discountRate) {
+    public static Coupon create(CouponType type, Long userId, Money amount, Percent discountRate) {
         return Coupon.builder()
                 .type(type)
                 .userId(userId)
                 .amount(amount)
                 .discountRate(discountRate)
                 .build();
-    }
-
-    public CouponId getCouponId() {
-        return getId() == null ? null : CouponId.of(getId());
     }
 
     public void use() {

@@ -1,11 +1,11 @@
 package com.loopers.domain.coupon;
 
-import com.loopers.domain.user.UserId;
-
 import java.util.Optional;
 
 public interface CouponRepository {
-    Optional<Coupon> findByIdAndCouponId(CouponId couponId, UserId userId);
+    Optional<Coupon> findByIdAndUserId(Long couponId, Long userId);
 
     Coupon save(Coupon coupon);
+
+    Optional<Coupon> findByOrderId(Long orderId);
 }

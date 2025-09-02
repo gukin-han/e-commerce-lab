@@ -1,6 +1,5 @@
 package com.loopers.application.product;
 
-import com.loopers.domain.product.ProductId;
 import com.loopers.domain.product.ProductService;
 import com.loopers.common.error.CoreException;
 import com.loopers.utils.DatabaseCleanUp;
@@ -29,7 +28,7 @@ class ProductServiceTest {
         @DisplayName("존재하지 않는 상품 ID로 상품 조회하는 경우 CoreException 예외를 던진다")
         @Test
         void throwsEntityNotFoundException_whenProductIdIsNotFound() {
-            Assertions.assertThatThrownBy(() -> productService.findByProductId(ProductId.of(999L)))
+            Assertions.assertThatThrownBy(() -> productService.findByProductId(999L))
                     .isInstanceOf(CoreException.class);
         }
     }

@@ -1,9 +1,6 @@
 package com.loopers.domain.product;
 
-import com.loopers.domain.brand.BrandId;
 import lombok.Getter;
-
-import java.math.BigDecimal;
 
 @Getter
 public class ProductDetail {
@@ -12,7 +9,7 @@ public class ProductDetail {
     private Money price;
     private Stock stock;
     private Long likeCount;
-    private BrandId brandId;
+    private Long brandId;
     private String brandName;
 
     public ProductDetail(Long productId, String productName, Money price, Stock stock, Long likeCount, Long brandId, String brandName) {
@@ -21,7 +18,7 @@ public class ProductDetail {
         this.price = price;
         this.stock = stock;
         this.likeCount = likeCount;
-        this.brandId = BrandId.of(brandId);
+        this.brandId = brandId;
         this.brandName = brandName;
     }
 }

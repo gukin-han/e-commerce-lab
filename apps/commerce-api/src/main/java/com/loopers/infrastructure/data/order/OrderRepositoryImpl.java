@@ -1,13 +1,13 @@
 package com.loopers.infrastructure.data.order;
 
 import com.loopers.domain.order.Order;
-import com.loopers.domain.order.OrderId;
-import com.loopers.domain.order.OrderItem;
 import com.loopers.domain.order.OrderRepository;
+import com.loopers.domain.order.OrderStatus;
+import com.loopers.domain.order.QOrder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -22,7 +22,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Optional<Order> findByOrderId(OrderId orderId) {
-        return orderJpaRepository.findById(orderId.getValue());
+    public Optional<Order> findByOrderId(Long orderId) {
+        return orderJpaRepository.findById(orderId);
     }
 }

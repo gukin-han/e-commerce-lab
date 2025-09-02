@@ -1,7 +1,6 @@
 package com.loopers.application.product.dto;
 
 import com.loopers.domain.brand.Brand;
-import com.loopers.domain.brand.BrandId;
 import com.loopers.domain.product.*;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,7 @@ import lombok.Data;
 public class ProductSummaryView {
 
     // Product
-    private final ProductId productId;
+    private final Long productId;
 
     private final Stock stock;
 
@@ -23,12 +22,12 @@ public class ProductSummaryView {
     private final Money price;
 
     // Brand
-    private final BrandId brandId;
+    private final Long brandId;
 
     private final String brandName;
 
     @Builder
-    private ProductSummaryView(ProductId productId, Stock stock, long likeCount, ProductStatus status, String productName, Money price, BrandId brandId, String brandName) {
+    private ProductSummaryView(Long productId, Stock stock, long likeCount, ProductStatus status, String productName, Money price, Long brandId, String brandName) {
         this.productId = productId;
         this.stock = stock;
         this.likeCount = likeCount;
@@ -41,20 +40,20 @@ public class ProductSummaryView {
 
     public static ProductSummaryView of(Product product, Brand brand) {
         return ProductSummaryView.builder()
-                .productId(product.getProductId())
+                .productId(product.getId())
                 .stock(product.getStock())
                 .likeCount(product.getLikeCount())
                 .status(product.getStatus())
                 .productName(product.getName())
                 .price(product.getPrice())
-                .brandId(brand.getBrandId())
+                .brandId(brand.getId())
                 .brandName(brand.getName())
                 .build();
     }
 
     public static ProductSummaryView from(ProductDetail productDetail) {
         return ProductSummaryView.builder()
-                .productId(ProductId.of(productDetail.getProductId()))
+                .productId(productDetail.getProductId())
                 .productName(productDetail.getProductName())
                 .price(productDetail.getPrice())
                 .stock(productDetail.getStock())

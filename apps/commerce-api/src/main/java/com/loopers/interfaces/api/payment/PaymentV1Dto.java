@@ -34,7 +34,6 @@ public class PaymentV1Dto {
             return InitiateCommand.builder()
                     .orderId(orderId)
                     .method(method)
-                    .callbackUrl(callbackUrl)
                     .cardType(cardType)
                     .cardNo(cardNo)
                     .build();

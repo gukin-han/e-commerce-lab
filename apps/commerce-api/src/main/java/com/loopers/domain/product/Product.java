@@ -1,7 +1,6 @@
 package com.loopers.domain.product;
 
 import com.loopers.domain.BaseEntity;
-import com.loopers.domain.brand.BrandId;
 import com.loopers.common.error.CoreException;
 import com.loopers.common.error.ErrorType;
 import jakarta.persistence.*;
@@ -31,11 +30,10 @@ public class Product extends BaseEntity {
     @AttributeOverride(name = "value", column = @Column(name = "price"))
     private Money price;
 
-    @Embedded
-    private BrandId brandId;
+    private Long brandId;
 
     @Builder
-    private Product(Stock stock, long likeCount, ProductStatus status, String name, Money price, BrandId brandId) {
+    private Product(Stock stock, long likeCount, ProductStatus status, String name, Money price, Long brandId) {
         this.stock = stock;
         this.likeCount = likeCount;
         this.status = status;
@@ -51,7 +49,7 @@ public class Product extends BaseEntity {
         this.status = ProductStatus.ACTIVE;
     }
 
-    public static Product create(Stock stock, String name, Money price, BrandId brandId) {
+    public static Product create(Stock stock, String name, Money price, Long brandId) {
         return Product.builder()
                 .stock(stock)
                 .name(name)
@@ -70,6 +68,10 @@ public class Product extends BaseEntity {
             this.status = ProductStatus.SOLD_OUT;
         }
         this.stock = decreasedStock;
+    }
+
+    public void increaseStock(long quantity) {
+        this.stock = stock.increase(quantity);
     }
 
     private void canDecrease() {
@@ -91,9 +93,5 @@ public class Product extends BaseEntity {
             throw new CoreException(ErrorType.CONFLICT, "상품의 좋아요 수는 0보다 작을 수 없습니다.");
         }
         this.likeCount--;
-    }
-
-    public ProductId getProductId() {
-        return getId() == null ? null : ProductId.of(getId());
     }
 }

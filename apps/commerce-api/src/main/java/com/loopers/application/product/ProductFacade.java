@@ -7,12 +7,12 @@ import com.loopers.application.product.dto.ProductDetailView;
 import com.loopers.application.product.dto.ProductPageQuery;
 import com.loopers.application.product.dto.ProductSummaryView;
 import com.loopers.domain.brand.Brand;
-import com.loopers.domain.brand.BrandId;
 import com.loopers.domain.brand.BrandService;
 import com.loopers.domain.product.*;
 import com.loopers.common.cache.CacheRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -39,7 +39,7 @@ public class ProductFacade {
         return cacheRepository.cacheAside(
                 key,
                 () -> {
-                    Product product = productService.findByProductId(ProductId.of(pid));
+                    Product product = productService.findByProductId(pid);
                     Brand brand = brandService.findByBrandId(product.getBrandId());
                     return ProductDetailView.create(product, brand);
                 },
@@ -61,7 +61,7 @@ public class ProductFacade {
         return cacheRepository.cacheAside(
                 key,
                 () -> {
-                    BrandId brandId = query.getBrandId() == null ? null : BrandId.of(query.getBrandId());
+                    Long brandId = query.getBrandId() == null ? null : query.getBrandId();
 
                     List<ProductSummaryView> views = productService.findProducts(
                             brandId,
@@ -77,5 +77,14 @@ public class ProductFacade {
                 typeRef,
                 TTL_LIST
         );
+    }
+
+    public void increaseLikeCount(Long productId) {
+        productRepository.incrementLikeCount(productId);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void decreaseLikeCount(Long productId) {
+        productRepository.decrementLikeCount(productId);
     }
 }

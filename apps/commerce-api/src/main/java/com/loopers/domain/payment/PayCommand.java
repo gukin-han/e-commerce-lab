@@ -24,7 +24,7 @@ public class PayCommand {
     public static PayCommand from(Order order, PaymentMethod method) {
         return PayCommand.builder()
                 .orderId(order.getId())
-                .userId(order.getUserId().getValue())
+                .userId(order.getUserId())
                 .amount(order.getTotalPrice())
                 .method(method)
                 .build();

@@ -42,12 +42,12 @@ public class Payment extends BaseEntity {
         this.canceledAt = canceledAt;
     }
 
-    public static Payment createPending(Long userId, Long orderId, Money amount, PaymentMethod method) {
+    public static Payment createRequested(Long userId, Long orderId, Money amount, PaymentMethod method) {
         return Payment.builder()
                 .orderId(orderId)
                 .userId(userId)
                 .method(method)
-                .status(PaymentStatus.PENDING)
+                .status(PaymentStatus.REQUESTED)
                 .build();
     }
 
@@ -60,7 +60,7 @@ public class Payment extends BaseEntity {
                 .build();
     }
 
-    public void fails() {
+    public void fail() {
         this.status = PaymentStatus.FAILED;
     }
 

@@ -31,4 +31,9 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     public Page<Payment> findPendingSince(ZonedDateTime cutoff, Pageable pageable) {
         return paymentJpaRepository.findPendingSince(cutoff, pageable);
     }
+
+    @Override
+    public boolean existsByOrderId(Long orderId) {
+        return paymentJpaRepository.existsById(orderId);
+    }
 }

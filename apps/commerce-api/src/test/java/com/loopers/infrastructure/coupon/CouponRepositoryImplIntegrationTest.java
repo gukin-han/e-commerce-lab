@@ -4,7 +4,6 @@ import com.loopers.domain.coupon.Coupon;
 import com.loopers.domain.coupon.CouponRepository;
 import com.loopers.domain.coupon.CouponType;
 import com.loopers.domain.product.Money;
-import com.loopers.domain.user.UserId;
 import com.loopers.utils.DatabaseCleanUp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,15 +42,15 @@ class CouponRepositoryImplIntegrationTest {
         @Test
         void isPresent() {
             //given
-            Coupon coupon = Coupon.create(CouponType.FIXED_AMOUNT, UserId.of(1L), Money.of(1000L), null);
+            Coupon coupon = Coupon.create(CouponType.FIXED_AMOUNT, 1L, Money.of(1000L), null);
             Coupon savedCoupon = couponRepository.save(coupon);
 
             //when
-            Optional<Coupon> optionalCoupon = couponRepository.findByIdAndCouponId(savedCoupon.getCouponId(), savedCoupon.getUserId());
+            Optional<Coupon> optionalCoupon = couponRepository.findByIdAndUserId(savedCoupon.getId(), savedCoupon.getUserId());
 
             //then
             assertThat(optionalCoupon.isPresent()).isTrue();
-            assertThat(optionalCoupon.get().getCouponId()).isEqualTo(savedCoupon.getCouponId());
+            assertThat(optionalCoupon.get().getId()).isEqualTo(savedCoupon.getId());
         }
     }
 

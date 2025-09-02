@@ -66,7 +66,7 @@ class ProductV1ControllerTest {
                         .price(Money.of(1000L * (i + 1)))
                         .stock(Stock.of(10L))
                         .status(ProductStatus.ACTIVE)
-                        .brandId(brand.getBrandId())
+                        .brandId(brand.getId())
                         .likeCount(i)
                         .build());
             }
@@ -112,7 +112,7 @@ class ProductV1ControllerTest {
                         .price(Money.of(1000L * (i + 1)))
                         .stock(Stock.of(10L))
                         .status(ProductStatus.ACTIVE)
-                        .brandId(brandA.getBrandId())
+                        .brandId(brandA.getId())
                         .likeCount(i)
                         .build());
             }
@@ -122,7 +122,7 @@ class ProductV1ControllerTest {
                         .price(Money.of(1000L * (i + 1)))
                         .stock(Stock.of(10L))
                         .status(ProductStatus.ACTIVE)
-                        .brandId(brandB.getBrandId())
+                        .brandId(brandB.getId())
                         .likeCount(i)
                         .build());
             }
@@ -131,7 +131,7 @@ class ProductV1ControllerTest {
                     .queryParam("page", "0")
                     .queryParam("size", "10")
                     .queryParam("sortType", "LATEST")
-                    .queryParam("brandId", brandA.getBrandId().getValue())
+                    .queryParam("brandId", brandA.getId())
                     .build()
                     .toUri();
 
@@ -169,7 +169,7 @@ class ProductV1ControllerTest {
                     .price(Money.of(1000L))
                     .stock(Stock.of(10L))
                     .status(ProductStatus.ACTIVE)
-                    .brandId(brand.getBrandId())
+                    .brandId(brand.getId())
                     .build());
 
             // when
