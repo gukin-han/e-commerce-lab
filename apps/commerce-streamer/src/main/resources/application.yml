@@ -1,0 +1,64 @@
+server:
+  shutdown: graceful
+  tomcat:
+    threads:
+      max: 200 # ?? ?? ??? ? (default : 200)
+      min-spare: 10 # ?? ?? ??? ? (default : 10)
+    connection-timeout: 1m # ?? ???? (ms) (default : 60000ms = 1m)
+    max-connections: 8192 # ?? ?? ?? ? (default : 8192)
+    accept-count: 100 # ?? ? ?? (default : 100)
+    keep-alive-timeout: 60s # 60s
+  max-http-request-header-size: 8KB
+
+spring:
+  main:
+    web-application-type: servlet
+  application:
+    name: commerce-streamer
+  profiles:
+    active: local
+  config:
+    import:
+      - jpa.yml
+      - logging.yml
+      - monitoring.yml
+      - redis.yml
+      - kafka.yml
+
+springdoc:
+  use-fqn: true
+  swagger-ui:
+    path: /swagger-ui.html
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local, test
+
+server:
+  port: 8085
+management:
+  server:
+    port: 8086
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: qa
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prd
+
+springdoc:
+  api-docs:
+    enabled: false

@@ -9,7 +9,7 @@ plugins {
 
 kotlin {
     compilerOptions {
-        jvmToolchain(21)
+        jvmToolchain(17)
         freeCompilerArgs.addAll("-Xjsr305=strict")
     }
 }
