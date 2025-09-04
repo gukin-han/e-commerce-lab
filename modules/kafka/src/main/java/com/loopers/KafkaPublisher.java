@@ -23,10 +23,6 @@ public class KafkaPublisher {
     record.headers().add("eventId", envelope.eventId().getBytes(StandardCharsets.UTF_8));
     record.headers().add("occurredAt", envelope.occurredAt().toString().getBytes(StandardCharsets.UTF_8));
 
-    // 선택 헤더
-    envelope.headers().forEach((k, v) ->
-        record.headers().add(k, v.getBytes(StandardCharsets.UTF_8)));
-
     kafka.send(record);
   }
 }

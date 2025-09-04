@@ -13,10 +13,11 @@ public class EventPublisherImpl implements EventPublisher {
   private final KafkaPublisher kafkaPublisher;
 
   @Override
-  public void publish(String topic, String key, Object payload) {
+  public void publish(String topic, String key, String eventType, Object payload) {
     Envelope<Object> envelope = Envelope.create(
         topic,
         key,
+        eventType,
         payload
     );
     kafkaPublisher.publish(envelope);
