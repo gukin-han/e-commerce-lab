@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
@@ -23,10 +24,9 @@ public class ProductMetricListener {
   private final ProductMetricFacade productMetricFacade;
 
   @KafkaListener(
-      topics = "like-events",
-      groupId = "product-metric-group"
+      topics = "like-events"
   )
-  public void handleLikeChangedEvent(ConsumerRecord<String, String> record) {
+  public void handleLikeChangedEvent(ConsumerRecord<String, String> record, Acknowledgment ack) {
     try {
       // 1. Envelope
       Envelope<ProductMetricEvent.Like> envelope = objectMapper.readValue(record.value(), new TypeReference<>() {});
@@ -39,6 +39,7 @@ public class ProductMetricListener {
       } else if (LIKE_DELETED_V1.equals(eventType)) {
         productMetricFacade.decreaseLikeCount(command);
       }
+      ack.acknowledge();
 
     } catch (Exception e) {
       log.error("Failed to parse event payload: {}", record.value(), e);
