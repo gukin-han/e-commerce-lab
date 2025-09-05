@@ -37,10 +37,10 @@ spring:
       on-profile: local, test
 
 server:
-  port: 8085
+  port: 8084
 management:
   server:
-    port: 8086
+    port: 8085
 ---
 spring:
   config:

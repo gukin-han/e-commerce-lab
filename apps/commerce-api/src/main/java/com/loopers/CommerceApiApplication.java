@@ -9,9 +9,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.TimeZone;
 
-@ConfigurationPropertiesScan
 @EnableFeignClients
 @EnableScheduling
+@ConfigurationPropertiesScan
 @SpringBootApplication
 public class CommerceApiApplication {
 

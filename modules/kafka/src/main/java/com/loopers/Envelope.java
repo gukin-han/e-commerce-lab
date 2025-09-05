@@ -1,10 +1,11 @@
 package com.loopers;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
 
+import java.util.UUID;
+import lombok.Builder;
+
+@Builder
 public record Envelope<T>(
     String topic,                 // ex) "commerce.order.v1"
     String key,                   // ex) aggregateId / partition key
