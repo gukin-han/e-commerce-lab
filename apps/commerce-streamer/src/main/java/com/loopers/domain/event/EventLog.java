@@ -6,12 +6,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "event_logs")
+@AllArgsConstructor
 @Entity
 public class EventLog extends BaseEntity {
 
@@ -24,4 +26,6 @@ public class EventLog extends BaseEntity {
 
   @Column(columnDefinition = "json")
   private String payload;
+
+
 }
