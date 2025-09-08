@@ -1,9 +1,13 @@
 package com.loopers.application.like;
 
+import com.loopers.domain.common.event.EventPublisher;
+import com.loopers.domain.common.event.OutBoundEvent;
 import com.loopers.domain.like.ProductLikeEvent;
 import com.loopers.domain.like.ProductLikeRepository;
+import com.loopers.domain.product.ProductRepository;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserService;
+import com.loopers.infrastructure.event.AfterCommitEventRelay;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -18,7 +22,8 @@ public class ProductLikeFacade {
 
     private final UserService userService;
     private final ProductLikeRepository productLikeRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final ProductRepository productRepository;
+    private final AfterCommitEventRelay eventRelay;
 
     @Transactional
     public ProductLikeResult.Like like(ProductLikeCommand.Like command) {
@@ -29,7 +34,17 @@ public class ProductLikeFacade {
 
         // 2. 상품 좋아요 수 증가
         if (isInserted) {
-            eventPublisher.publishEvent(new ProductLikeEvent.Added(command.productId(), UUID.randomUUID(), Instant.now()));
+            productRepository.incrementLikeCount(command.productId());
+
+            // 스프링 이벤트 발행(AFTER_COMMIT) -> 카프카 이벤트 발행
+            eventRelay.on(new OutBoundEvent(
+                "like-events",
+                command.productId().toString(),
+                "like.added.v1",
+                new ProductLikeEvent.Added(command.productId())
+                )
+            );
+
             return ProductLikeResult.Like.success();
         }
 
@@ -43,9 +58,17 @@ public class ProductLikeFacade {
         // 1. 상품 좋아요 삭제
         boolean isDeleted = productLikeRepository.deleteByProductIdAndUserId(user.getId(), command.productId());
         if (isDeleted) {
+            // 2. 상품 좋아요 수 감소
+            productRepository.decrementLikeCount(command.productId());
 
-        // 2. 상품 좋아요 수 감소
-            eventPublisher.publishEvent(new ProductLikeEvent.Deleted(command.productId(), UUID.randomUUID(), Instant.now()));
+            // 스프링 이벤트 발행(AFTER_COMMIT) -> 카프카 이벤트 발행
+            eventRelay.on(new OutBoundEvent(
+                "like-events", command.productId().toString(),
+                "like.deleted.v1",
+                new ProductLikeEvent.Deleted(command.productId())
+                )
+            );
+
             return ProductLikeResult.Unlike.success();
         }
 

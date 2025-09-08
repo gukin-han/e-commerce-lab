@@ -5,14 +5,10 @@ import java.util.UUID;
 
 public class ProductLikeEvent {
     public record Added(
-            Long productId,
-            UUID eventId,
-            Instant occurredAt
+            Long productId
     ) {}
 
     public record Deleted(
-            Long productId,
-            UUID eventId,
-            Instant occurredAt
+            Long productId
     ) {}
 }

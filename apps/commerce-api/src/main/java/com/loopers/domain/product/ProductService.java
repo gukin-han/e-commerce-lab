@@ -3,6 +3,9 @@ package com.loopers.domain.product;
 import com.loopers.application.product.dto.ProductSortType;
 import com.loopers.common.error.CoreException;
 import com.loopers.common.error.ErrorType;
+import com.loopers.domain.common.event.OutBoundEvent;
+import com.loopers.domain.product.ProductEvent.StockChanged;
+import com.loopers.infrastructure.event.AfterCommitEventRelay;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +18,7 @@ import java.util.Map;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final AfterCommitEventRelay eventRelay;
 
     @Transactional(readOnly = true)
     public Product findByProductId(Long productId) {
@@ -46,6 +50,12 @@ public class ProductService {
             Long productId = product.getId();
             Stock stock = productIdToStockMap.get(productId);
             product.decreaseStock(stock.getQuantity());
+            eventRelay.on(new OutBoundEvent(
+                "stock-events",
+                product.getId().toString(),
+                "stock.decreased.v1",
+                new StockChanged(productId, product.getStock().getQuantity(), product.getStatus().name()))
+            );
         }
     }
 

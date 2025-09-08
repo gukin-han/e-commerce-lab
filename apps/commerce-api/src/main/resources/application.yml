@@ -23,6 +23,7 @@ spring:
       - logging.yml
       - monitoring.yml
       - redis.yml
+      - kafka.yml
 
 
 springdoc:
