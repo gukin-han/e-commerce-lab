@@ -18,4 +18,10 @@ public class RankInMemoryRepositoryImpl implements RankInMemoryRepository {
     public Set<ZSetOperations.TypedTuple<String>> findTopRankings(String key, long start, long end) {
         return redisTemplate.opsForZSet().reverseRangeWithScores(key, start, end);
     }
+
+    @Override
+    public Long findRankByProductId(String key, Long productId) {
+        Long rank = redisTemplate.opsForZSet().reverseRank(key, productId.toString());
+        return rank != null ? rank + 1 : null;
+    }
 }

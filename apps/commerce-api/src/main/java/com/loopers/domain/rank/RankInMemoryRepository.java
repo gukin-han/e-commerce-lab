@@ -6,4 +6,6 @@ import java.util.Set;
 
 public interface RankInMemoryRepository {
     Set<TypedTuple<String>> findTopRankings(String key, long start, long end);
+
+    Long findRankByProductId(String key, Long productId);
 }
