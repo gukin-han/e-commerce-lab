@@ -15,6 +15,9 @@ dependencies {
     // cloud
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
+    // batch
+    implementation("org.springframework.boot:spring-boot-starter-batch")
+
     // resilience4j
     implementation("io.github.resilience4j:resilience4j-spring-boot3")
     implementation("org.springframework.boot:spring-boot-starter-aop")
