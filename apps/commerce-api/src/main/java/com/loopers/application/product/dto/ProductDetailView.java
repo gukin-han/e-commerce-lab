@@ -26,8 +26,10 @@ public class ProductDetailView {
 
     private final String brandName;
 
+    private final Long rank;
+
     @Builder
-    private ProductDetailView(Long productId, Stock stock, long likeCount, ProductStatus status, String productName, Money price, Long brandId, String brandName) {
+    private ProductDetailView(Long productId, Stock stock, long likeCount, ProductStatus status, String productName, Money price, Long brandId, String brandName, Long rank) {
         this.productId = productId;
         this.stock = stock;
         this.likeCount = likeCount;
@@ -36,9 +38,10 @@ public class ProductDetailView {
         this.price = price;
         this.brandId = brandId;
         this.brandName = brandName;
+        this.rank = rank;
     }
 
-    public static ProductDetailView create(Product product, Brand brand) {
+    public static ProductDetailView of(Product product, Brand brand, Long rank) {
         return ProductDetailView.builder()
                 .productId(product.getId())
                 .stock(product.getStock())
@@ -48,6 +51,7 @@ public class ProductDetailView {
                 .price(product.getPrice())
                 .brandId(brand.getId())
                 .brandName(brand.getName())
+                .rank(rank)
                 .build();
     }
 }

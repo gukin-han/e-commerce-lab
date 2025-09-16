@@ -113,6 +113,7 @@ public class ProductV1Dto {
         private final Long brandId;
 
         private final String brandName;
+        private final Long rank;
 
         public static GetProductByIdResponse of(ProductDetailView view) {
             return GetProductByIdResponse.builder()
@@ -124,6 +125,7 @@ public class ProductV1Dto {
                     .price(view.getPrice().getValue().doubleValue())
                     .brandId(view.getBrandId())
                     .brandName(view.getBrandName())
+                    .rank(view.getRank())
                     .build();
         }
     }

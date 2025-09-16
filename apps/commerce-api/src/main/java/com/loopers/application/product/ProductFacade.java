@@ -9,6 +9,7 @@ import com.loopers.application.product.dto.ProductSummaryView;
 import com.loopers.domain.brand.Brand;
 import com.loopers.domain.brand.BrandService;
 import com.loopers.domain.product.*;
+import com.loopers.domain.rank.RankInMemoryRepository;
 import com.loopers.common.cache.CacheRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +29,7 @@ public class ProductFacade {
     private final ProductService productService;
     private final BrandService brandService;
     private final ProductRepository productRepository;
+    private final RankInMemoryRepository rankInMemoryRepository;
     private final CacheRepository cacheRepository;
 
     private static final Duration TTL_DETAIL = Duration.ofMinutes(10);
@@ -41,7 +45,11 @@ public class ProductFacade {
                 () -> {
                     Product product = productService.findByProductId(pid);
                     Brand brand = brandService.findByBrandId(product.getBrandId());
-                    return ProductDetailView.create(product, brand);
+
+                    String rankKey = "ranking:all:" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+                    Long rank = rankInMemoryRepository.findRankByProductId(rankKey, product.getId());
+
+                    return ProductDetailView.of(product, brand, rank);
                 },
                 new TypeReference<>() {},
                 TTL_DETAIL
