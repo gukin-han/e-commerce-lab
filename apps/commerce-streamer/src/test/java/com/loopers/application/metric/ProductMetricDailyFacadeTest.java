@@ -1,7 +1,6 @@
 package com.loopers.application.metric;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import com.loopers.application.metric.ProductMetricCommand.Change;
 import com.loopers.domain.metric.ProductMetric;
@@ -17,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ProductMetricFacadeTest {
+class ProductMetricDailyFacadeTest {
 
   @Autowired
   ProductMetricFacade sut;

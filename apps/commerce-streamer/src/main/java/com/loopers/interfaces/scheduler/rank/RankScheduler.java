@@ -18,5 +18,4 @@ public class RankScheduler {
     // c=0.10, K=1000 (값은 yml/외부화 필요 - 지금은 하드코딩)
     rankFacade.carryOverDaily(0.10, TOP_K);
   }
-
 }

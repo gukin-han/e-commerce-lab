@@ -35,6 +35,11 @@ spring:
   config:
     activate:
       on-profile: local, test
+  batchL:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
 
 server:
   port: 8084

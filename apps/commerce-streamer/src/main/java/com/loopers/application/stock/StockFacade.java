@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class StockFacade {
 
   public static final String SOLD_OUT = "SOLD_OUT";
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final RedisTemplate<String, String> redisTemplate;
 
   public void handleStockChange(changed command) {
     String cacheKey = buildCacheKey(command);
